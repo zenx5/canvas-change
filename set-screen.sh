@@ -39,20 +39,25 @@ getscreen(){
 
 setscreen(){
     PID=$(pgrep gnome-session)
-    export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/6673/environ|cut -d= -f2-)
+    result_split=()
+    split_string "$PID" " "
+    PID=${result_split[0]}    
+    export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PID/environ|cut -d= -f2-)
     # sessionfile=`find "${HOME}/.dbus/session-bus/" -type f`
     # export `grep "DBUS_SESSION_BUS_ADDRESS" "${sessionfile}" | sed '/^#/d'`
     gsettings set org.gnome.desktop.background picture-uri "'$1.$2'"
 }
 
 result_split=()
-shlist="$($SH $ROUTEDIR/list.sh)"
-split_string "$shlist" " "
+list="$(cd $ROUTEDIR/image && ls && cd $ROUTEDIR)"
+shlist="$(echo ${list[0]})"
+split_string "${shlist[0]}" " "
 list=()
 templist=()
 
 for e in ${result_split[@]}
 do
+    echo "e = $e"
     templist+=("$e")
 done
 
@@ -98,7 +103,7 @@ name=${result_split[$?-2]}
 ext=${result_split[$?-1]}
 
 #determinamos cual es el indice del siguiente elemento en ser seteado
-current=-1
+current=10
 i=0
 for e in ${list[@]}
 do
@@ -114,7 +119,6 @@ echo $current
 echo $max
 if test $current -eq $max;
 then
-    echo "then"
     current=-1
 fi
 
